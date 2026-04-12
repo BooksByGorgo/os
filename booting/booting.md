@@ -50,7 +50,7 @@ It continually reads instructions from memory and executes them.
 What does a processor do when a machine powers on?
 There is nothing in RAM when the power is switched on, so what can it execute?
 
-![Figure 1: System startup timeline.](images/boot-timeline.png)
+![System startup timeline.](images/boot-timeline.png)
 
 Figure 1 shows a timeline of the different programs involved in booting an operating system.
 
@@ -113,7 +113,7 @@ The bootloader's main job is to get the operating system kernel loaded and runni
 
 ### Raspberry Pi
 
-![Figure 2: Raspberry Pi boot process. Image from @piboot which has more details of the process.](images/raspberry-pi-boot-process.png){ width=30% }
+![Raspberry Pi boot process. Image from @piboot which has more details of the process.](images/raspberry-pi-boot-process.png){ width=30% }
 
 There is an interesting variation to the above boot sequence that is found in the Raspberry Pi, which is popular in embedded applications.
 Figure 2 shows a flow similar to the one that we just discussed except that the first processor involved is the GPU (Graphical Processing Unit) rather than the CPU, which is an ARM processor on the Pi.
@@ -164,7 +164,7 @@ If the `init` process ever finishes, the system will crash.
 
 ### System calls
 
-![Figure 3: An example of `myapp` opening a file by invoking a system call.](images/monolith.png){ width=50% }
+![An example of `myapp` opening a file by invoking a system call.](images/monolith.png){ width=50% }
 
 During system startup and even normal execution processes will need to do powerful operations that they cannot do in user-mode.
 Some examples of these kinds of operations are: give or remove physical memory, create new processes, end processes, access hardware devices, etc.
@@ -234,7 +234,7 @@ As you can imagine micro kernels can have quite a bit of overhead and introduce 
 For example, in a monolithic kernel, the file system driver can call a storage system driver through a function call.
 Both drivers can access each others' memory, so the interaction really is as simple as a function call.
 
-![Figure 4: An example of `myapp` opening a file by invoking a system call in a microkernel.](images/micro.png){ width=75% }
+![An example of `myapp` opening a file by invoking a system call in a microkernel.](images/micro.png){ width=75% }
 
 Figure 4 shows `myapp` invoking a system call to open a file in a microkernel.
 In a microkernel, the file system is running outside the kernel but the kernel mediates the communication between `myapp`.

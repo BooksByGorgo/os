@@ -37,7 +37,7 @@ local function callout_kind(el)
   if label == "Tip:"  then return "tip"  end
   if label == "Trap:" then return "trap" end
   if label == "Wut:"  then return "wut"  end
-  return nil
+  return "tip"
 end
 
 function Div(el)
