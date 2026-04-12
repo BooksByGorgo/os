@@ -1,0 +1,171 @@
+#!/bin/bash
+set -euo pipefail
+shopt -s nullglob
+
+DOCS=docs
+INCLUDES=$DOCS/_includes
+PANDOC_OPTS="-f markdown -t html5 --highlight-style=pygments --wrap=none --email-obfuscation=none"
+
+PDF_ICON_SVG='<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>'
+
+get_heading() {
+    grep -m1 '^#\+ ' "$1" | sed -e 's/^#\+ //' -e 's/[[:space:]]*{[^}]*}[[:space:]]*$//'
+}
+
+convert_chapter() {
+    local src_dir="$1" md_base="$2" dest="$3" title="$4" parent="$5" nav_order="$6"
+
+    mkdir -p "$(dirname "$dest")"
+
+    local filter_opt=""
+    [ -f "$src_dir/callout.lua" ] && filter_opt="--lua-filter=callout.lua"
+    [ -f "callout.lua" ] && filter_opt="--lua-filter=../callout.lua"
+
+    local -a cite_opts=()
+    for bib in "$src_dir"/*.bib; do
+        cite_opts+=(--citeproc "--bibliography=$(basename "$bib")")
+        break
+    done
+    for csl in "$src_dir"/*.csl; do
+        cite_opts+=("--csl=$(basename "$csl")")
+        break
+    done
+
+    {
+        printf '%s\n' "---"
+        printf 'layout: default\n'
+        printf 'title: "%s"\n' "$title"
+        printf 'parent: "%s"\n' "$parent"
+        printf 'nav_order: %s\n' "$nav_order"
+        printf '%s\n\n' "---"
+        printf '{%% raw %%}\n'
+        (cd "$src_dir" && pandoc "$md_base" $PANDOC_OPTS $filter_opt "${cite_opts[@]}")
+        printf '\n{%% endraw %%}\n'
+    } > "$dest"
+}
+
+build_book_pdfs() {
+    local src_dir="$1"
+    if [ ! -f "$src_dir/Makefile" ]; then
+        return
+    fi
+    echo "building PDFs in $src_dir"
+    if ! (cd "$src_dir" && make -k -j4 pdf); then
+        echo "warning: one or more PDF targets failed for $src_dir" >&2
+    fi
+}
+
+copy_pdf() {
+    local src="$1" dst="$2"
+    if [ -f "$src" ]; then
+        mkdir -p "$(dirname "$dst")"
+        cp "$src" "$dst"
+    fi
+}
+
+emit_chapter_entry() {
+    local dest_subdir="$1" base_noext="$2" title="$3" include_pdf="$4"
+    printf '  <li>\n'
+    printf "    <a href=\"{{ '/%s/%s.html' | relative_url }}\">%s</a>\n" \
+        "$dest_subdir" "$base_noext" "$title"
+    if [ "$include_pdf" = "yes" ]; then
+        printf "    <a class=\"chapter-pdf-link\" href=\"{{ '/%s/%s.pdf' | relative_url }}\" title=\"Download chapter PDF\" aria-label=\"Download %s PDF\">%s</a>\n" \
+            "$dest_subdir" "$base_noext" "$title" "$PDF_ICON_SVG"
+    fi
+    printf '  </li>\n'
+}
+
+# Build a single-chapter directory (each OS chapter lives in its own directory).
+# src_dir: e.g. "booting"
+# dest_subdir: e.g. "ostep-supplement"
+# parent: the Jekyll parent page title
+# nav_order: ordering in the sidebar
+build_chapter() {
+    local src_dir="$1" dest_subdir="$2" parent="$3" nav_order="$4"
+
+    # Find the main markdown file (same name as directory, or the only .md file)
+    local md_file=""
+    if [ -f "$src_dir/$src_dir.md" ]; then
+        md_file="$src_dir.md"
+    else
+        for f in "$src_dir"/*.md; do
+            md_file=$(basename "$f")
+            break
+        done
+    fi
+
+    if [ -z "$md_file" ]; then
+        echo "warning: no markdown file found in $src_dir" >&2
+        return
+    fi
+
+    local title
+    title=$(get_heading "$src_dir/$md_file")
+
+    build_book_pdfs "$src_dir"
+
+    mkdir -p "$DOCS/$dest_subdir"
+    local base_noext="${md_file%.md}"
+    local html_dest="$DOCS/$dest_subdir/${base_noext}.html"
+
+    convert_chapter "$src_dir" "$md_file" "$html_dest" "$title" "$parent" "$nav_order"
+
+    # Copy chapter PDF if it was built
+    local pdf_src="$src_dir/${base_noext}.pdf"
+    local pdf_dst="$DOCS/$dest_subdir/${base_noext}.pdf"
+    copy_pdf "$pdf_src" "$pdf_dst"
+
+    # Return values via global vars for the caller to use
+    _chapter_title="$title"
+    _chapter_base="$base_noext"
+    _chapter_has_pdf=no
+    if [ -f "$pdf_dst" ]; then _chapter_has_pdf=yes; fi
+}
+
+# Copy chapter images into the docs tree so HTML pages can reference them.
+copy_chapter_images() {
+    local src_dir="$1" dest_subdir="$2"
+    if [ -d "$src_dir/images" ]; then
+        mkdir -p "$DOCS/$dest_subdir/images"
+        cp "$src_dir"/images/*.png "$DOCS/$dest_subdir/images/" 2>/dev/null || true
+        cp "$src_dir"/images/*.jpg "$DOCS/$dest_subdir/images/" 2>/dev/null || true
+    fi
+}
+
+# Main: build all chapters and generate the chapter list include.
+main() {
+    local dest_subdir="ostep-supplement"
+    local parent="OSTEP Supplement"
+    local include_file="$INCLUDES/${dest_subdir}-chapters.html"
+
+    mkdir -p "$INCLUDES" "$DOCS/$dest_subdir"
+
+    # Copy project-level images (callout icons) into docs
+    if [ -d "images" ]; then
+        mkdir -p "$DOCS/images"
+        cp images/*.png "$DOCS/images/" 2>/dev/null || true
+    fi
+
+    {
+        printf '<!-- generated by build-site.sh; do not edit -->\n'
+        printf '<ul class="chapter-list">\n'
+
+        local nav_order=0
+
+        # Each subdirectory with a .md file is a chapter
+        for chapter_dir in booting practical_locking; do
+            if [ -d "$chapter_dir" ]; then
+                build_chapter "$chapter_dir" "$dest_subdir" "$parent" "$nav_order"
+                copy_chapter_images "$chapter_dir" "$dest_subdir"
+                emit_chapter_entry "$dest_subdir" "$_chapter_base" "$_chapter_title" "$_chapter_has_pdf"
+                nav_order=$((nav_order + 1))
+            fi
+        done
+
+        printf '</ul>\n'
+    } > "$include_file"
+}
+
+main
+
+echo "site built successfully"

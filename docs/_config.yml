@@ -1,0 +1,21 @@
+title: Operating Systems
+description: Supplemental content for Operating Systems in Three Easy Pieces
+theme: just-the-docs
+
+url: https://gorgo.dev
+baseurl: /os
+
+aux_links:
+  GitHub:
+    - https://github.com/BooksByGorgo/os
+
+color_scheme: light
+
+footer_content: >-
+  Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+
+nav_sort: case_insensitive
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
