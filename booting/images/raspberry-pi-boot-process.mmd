@@ -1,0 +1,35 @@
+graph TD
+    subgraph gpuphase ["GPU"]
+        subgraph rom ["ROM"]
+            A["First Stage Bootloader\n<b>ROM Bootloader</b>"]
+        end
+        subgraph sd ["SD Card"]
+            B["Second Stage Bootloader\n<b>bootcode.bin</b>"]
+            C["<b>start.elf</b>"]
+            D["Load Linux Kernel\n<b>kernel.img</b>"]
+            B --> C --> D
+        end
+        A --> B
+    end
+
+    subgraph cpuphase ["CPU"]
+        subgraph sd2 ["SD Card"]
+            E["<b>kernel</b>"]
+            F["Root Filesystem\nInit Process"]
+            E --> F
+        end
+    end
+
+    D --> E
+
+    style gpuphase fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#3b82f6
+    style cpuphase fill:#fce7f3,stroke:#ec4899,stroke-width:2px,color:#ec4899
+    style A fill:#9ca3af,stroke:#333,color:#fff
+    style B fill:#b0b8c4,stroke:#333
+    style C fill:#d1d5db,stroke:#333
+    style D fill:#06b6d4,stroke:#333,color:#fff
+    style E fill:#dbeafe,stroke:#333
+    style F fill:#dbeafe,stroke:#333
+    style rom fill:#fde68a,stroke:#d97706
+    style sd fill:#bbf7d0,stroke:#22c55e
+    style sd2 fill:#bbf7d0,stroke:#22c55e
