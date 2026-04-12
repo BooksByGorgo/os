@@ -2,7 +2,7 @@ CHAPTER  = booting
 SRC      = $(CHAPTER).md
 BIB      = chap0.bib
 CSL      = ieee.csl
-FILTER   = callout.lua
+FILTER   = ../callout.lua
 
 PANDOC   = pandoc
 MMDC     = mmdc
