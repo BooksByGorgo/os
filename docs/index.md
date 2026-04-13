@@ -4,9 +4,13 @@ title: Home
 nav_order: 1
 ---
 
-# Operating Systems
-
-Supplemental content for [Operating Systems: Three Easy Pieces](https://pages.cs.wisc.edu/~remzi/OSTEP/) (OSTEP).
+<div style="display: flex; align-items: center; gap: 24px; margin-bottom: 1rem;">
+  <img src="images/os-gorgo-with-badge.png" alt="OS Gorgo" style="width: 150px; flex-shrink: 0;">
+  <div>
+    <h1 style="margin: 0;">Operating Systems</h1>
+    <p>Supplemental content for <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/">Operating Systems: Three Easy Pieces</a> (OSTEP).</p>
+  </div>
+</div>
 
 ## Chapters
 
