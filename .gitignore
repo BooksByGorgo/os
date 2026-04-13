@@ -1,8 +1,13 @@
 # build artifacts
 docs/_includes/
 docs/images/
-docs/ostep-supplement/
 _site/
+
+# generated chapter HTML and PDFs in docs/
+docs/booting.html
+docs/booting.pdf
+docs/practical_locking.html
+docs/practical_locking.pdf
 
 # chapter build outputs
 booting/booting.html

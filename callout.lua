@@ -5,9 +5,9 @@
 -- the icon. We point at the -callout.png downsized variants (256x256,
 -- ~100KB each) so chapter PDFs do not bloat the way they would if we
 -- embedded the 1024x1024 source PNGs. The path ../images/<kind>-callout
--- .png works for both LaTeX (from the book dir, pointing at the top-
--- level images/) and HTML (from a Jekyll chapter page at
--- /<book>/chNN.html, pointing at /images/ under docs/).
+-- .png works for both LaTeX (from the chapter dir, ../images/ points
+-- at the top-level images/) and HTML (from a Jekyll chapter page at
+-- /os/<chapter>.html, images/ points at /os/images/ under docs/).
 
 local tcb = "colback=black!5, colframe=black!20, " ..
   "boxrule=0.4pt, arc=2pt, left=5pt, right=5pt, " ..
@@ -82,7 +82,7 @@ function Div(el)
         '<div style="' .. html_style ..
         ' display: flex; gap: 12px; align-items: center;">'))
       blocks:insert(pandoc.RawBlock("html",
-        '<img src="../images/' .. kind .. '-callout.png" ' ..
+        '<img src="images/' .. kind .. '-callout.png" ' ..
         'style="width: 48px; flex-shrink: 0;">'))
       blocks:insert(pandoc.RawBlock("html",
         '<div style="flex: 1; min-width: 0;">'))
