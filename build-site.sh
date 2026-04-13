@@ -9,6 +9,16 @@ PANDOC_OPTS="-f markdown -t html5 --highlight-style=pygments --wrap=none --email
 PDF_ICON_SVG='<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>'
 
 get_heading() {
+    # prefer title from YAML frontmatter if present
+    if head -1 "$1" | grep -q '^---$'; then
+        local title
+        title=$(sed -n '/^---$/,/^---$/p' "$1" | grep -m1 '^title:' \
+            | sed -e 's/^title:[[:space:]]*//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+        if [ -n "$title" ]; then
+            echo "$title"
+            return
+        fi
+    fi
     grep -m1 '^#\+ ' "$1" | sed -e 's/^#\+ //' -e 's/[[:space:]]*{[^}]*}[[:space:]]*$//'
 }
 
@@ -49,8 +59,8 @@ build_book_pdfs() {
     if [ ! -f "$src_dir/Makefile" ]; then
         return
     fi
-    echo "building PDFs in $src_dir"
-    if ! (cd "$src_dir" && make -k -j4 pdf); then
+    echo "building PDFs in $src_dir" >&2
+    if ! (cd "$src_dir" && make -k -j4 pdf) >&2; then
         echo "warning: one or more PDF targets failed for $src_dir" >&2
     fi
 }
