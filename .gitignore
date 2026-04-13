@@ -1,0 +1,10 @@
+# build artifacts
+docs/_includes/
+docs/images/
+docs/ostep-supplement/
+_site/
+
+# chapter build outputs
+booting/booting.html
+booting/booting.pdf
+practical_locking/practical_locking.pdf
