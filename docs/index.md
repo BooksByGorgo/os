@@ -10,11 +10,7 @@ Supplemental content for [Operating Systems: Three Easy Pieces](https://pages.cs
 
 ## Chapters
 
-### [OSTEP Supplement](ostep-supplement)
-
-Chapters that supplement the OSTEP book with additional topics and practical guidance.
-
-{% include ostep-supplement-chapters.html %}
+{% include chapters.html %}
 
 ## AI Usage
 
