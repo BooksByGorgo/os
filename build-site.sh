@@ -142,10 +142,11 @@ main() {
 
     mkdir -p "$INCLUDES"
 
-    # Copy project-level images (callout icons) into docs
+    # Copy project-level images (callout icons, favicons) into docs
     if [ -d "images" ]; then
         mkdir -p "$DOCS/images"
         cp images/*.png "$DOCS/images/" 2>/dev/null || true
+        cp images/*.svg "$DOCS/images/" 2>/dev/null || true
     fi
 
     {

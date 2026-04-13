@@ -1,5 +1,5 @@
 # build artifacts
-docs/_includes/
+docs/_includes/chapters.html
 docs/images/
 _site/
 
